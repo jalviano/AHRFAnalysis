@@ -62,42 +62,47 @@ class AHRFDataAnalyzer(object):
             # Save category data to CSV file
             cat_df.to_csv('{}/ahrf2018_{}.csv'.format(DATA_DIR, cat), header=labels[start:end], index=False)
 
-    def get_environmental_data(self, column='Population Density per Sq Mile 2010', states=NE):
+    def get_environmental_data(self, column='Population Density per Sq Mile 2010', states=NE, normalize=False):
         """
         Plot environmental <column> data for selected <states>.
         """
-        geocodes, results = self._collect_data('env', column, states)
+        geocodes, results = self._collect_data('env', column, states, normalize)
         return geocodes, results
 
-    def get_expenses_data(self, column='Total Actual Medicare Costs Fee for Service 2015', states=NE):
+    def get_expenses_data(self, column='Total Actual Medicare Costs Fee for Service 2015', states=NE, normalize=False):
         """
         Plot expenses <column> data for selected <states>.
         """
-        self._collect_data('exps', column, states)
+        geocodes, results = self._collect_data('exps', column, states, normalize)
+        return geocodes, results
 
-    def get_facilities_data(self, column='Total Number Hospitals 2016', states=NE):
+    def get_facilities_data(self, column='Total Number Hospitals 2016', states=NE, normalize=False):
         """
         Plot facilities <column> data for selected <states>.
         """
-        self._collect_data('facils', column, states)
+        geocodes, results = self._collect_data('facils', column, states, normalize)
+        return geocodes, results
 
-    def get_population_data(self, column='Census Population 2010', states=NE):
+    def get_population_data(self, column='Census Population 2010', states=NE, normalize=False):
         """
         Plot population <column> data for selected <states>.
         """
-        self._collect_data('pop', column, states)
+        geocodes, results = self._collect_data('pop', column, states, normalize)
+        return geocodes, results
 
-    def get_professions_data(self, column='Total Active M.D.s Non-Federal 2016', states=NE):
+    def get_professions_data(self, column='Total Active M.D.s Non-Federal 2016', states=NE, normalize=False):
         """
         Plot professions <column> data for selected <states>.
         """
-        self._collect_data('profs', column, states)
+        geocodes, results = self._collect_data('profs', column, states, normalize)
+        return geocodes, results
 
-    def get_utilization_data(self, column='Inpatient Days Incl Nurs Home;Total Hosp 2016', states=NE):
+    def get_utilization_data(self, column='Inpatient Days Incl Nurs Home;Total Hosp 2016', states=NE, normalize=False):
         """
         Plot utilization <column> data for selected <states>.
         """
-        self._collect_data('util', column, states)
+        geocodes, results = self._collect_data('util', column, states, normalize)
+        return geocodes, results
 
     def _collect_data(self, category, column, states, normalize=False):
         """
@@ -131,21 +136,7 @@ class AHRFDataAnalyzer(object):
         else:
             results = results.values.flatten()
         # Build choropleth map
-        # self._plot_data(geocodes, results, states, column, category)
         return geocodes, results
-
-    def _plot_data(self, fips, values, states, column, category):
-        """
-        Build geocoded choropleth map of <column> data by county for selected <states>.
-        """
-        fig = go.create_choropleth(fips=fips,
-                                   values=values,
-                                   scope=states,
-                                   show_state_data=True,
-                                   round_legend_values=True,
-                                   legend_title=column,
-                                   exponent_format=True)
-        iplot(fig, filename='choropleth_map_{}'.format(category))
 
     def _get_col_widths(self):
         """
@@ -161,6 +152,20 @@ class AHRFDataAnalyzer(object):
         labels = pd.read_fwf(self._sas_file, skiprows=7285, header=None)[1].dropna().values.tolist()
         labels = [r.split('\"')[1] for r in labels]
         return labels
+
+    @staticmethod
+    def plot_data(fips, values, states, column, category):
+        """
+        Build geocoded choropleth map of <column> data by county for selected <states>.
+        """
+        fig = ff.create_choropleth(fips=fips,
+                                   values=values,
+                                   scope=states,
+                                   show_state_data=True,
+                                   round_legend_values=True,
+                                   legend_title=column,
+                                   exponent_format=True)
+        py.plot(fig, filename='choropleth_map_{}'.format(category))
 
     @staticmethod
     def _normalize(data):
