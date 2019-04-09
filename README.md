@@ -5,6 +5,8 @@ facilities, population, professions and utilization. Data is visualized in geoco
 
 To setup the project and launch the Juptyer notebook, run the following commands:
 
+`virtualenv -p python3 .env`
+
 `source .env/bin/activate`
 
 `pip install -r requirements.txt`
