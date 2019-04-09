@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import plotly.plotly as py
 import plotly.figure_factory as ff
+import plotly.graph_objs as go
 
 
 # Setup global variables
@@ -65,7 +66,8 @@ class AHRFDataAnalyzer(object):
         """
         Plot environmental <column> data for selected <states>.
         """
-        self._collect_data('env', column, states)
+        geocodes, results = self._collect_data('env', column, states)
+        return geocodes, results
 
     def get_expenses_data(self, column='Total Actual Medicare Costs Fee for Service 2015', states=NE):
         """
@@ -129,20 +131,21 @@ class AHRFDataAnalyzer(object):
         else:
             results = results.values.flatten()
         # Build choropleth map
-        self._plot_data(geocodes, results, states, column, category)
+        # self._plot_data(geocodes, results, states, column, category)
+        return geocodes, results
 
     def _plot_data(self, fips, values, states, column, category):
         """
         Build geocoded choropleth map of <column> data by county for selected <states>.
         """
-        fig = ff.create_choropleth(fips=fips,
+        fig = go.create_choropleth(fips=fips,
                                    values=values,
                                    scope=states,
                                    show_state_data=True,
                                    round_legend_values=True,
                                    legend_title=column,
                                    exponent_format=True)
-        py.plot(fig, filename='choropleth_map_{}'.format(category))
+        iplot(fig, filename='choropleth_map_{}'.format(category))
 
     def _get_col_widths(self):
         """
